@@ -1,12 +1,17 @@
-library("animation")
+# library("animation")
+require("scales")
 if (!exists("GIF"))
+{
 	GIF <- F
+       	cat("Defaulting to no GIF creation...\n")
+}
 # orbitPlot <- function()
 # {
 pdf("orbit.pdf")
 par.def <- par(no.readonly=T)
 
-plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l")
+plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l", col=alpha("black", 0.5))
+points(traj$X1, traj$X2, col=alpha("red", 0.01), pch=".")
 # points(rep(parms$r1[1], 2), rep(parms$r1[2], 2), pch=c(1, 19))
 points(parms$r1[1],parms$r1[2], pch=1)
 points(parms$r1[1],parms$r1[2], pch=".")
@@ -69,5 +74,5 @@ if (GIF)
 }
 # system("")
 
-system("cp orbit.pdf ~/Downloads/")
+# system("cp orbit.pdf ~/Downloads/")
 # }
