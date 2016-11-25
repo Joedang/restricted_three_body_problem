@@ -8,14 +8,41 @@
 
 # load packages
 require("deSolve")
-require("scatterplot3d")
+# require("scatterplot3d")
 source("orbitFunctions.R")
 
 #### Input parameters ####
+# time steps for the simulation:
+times <- seq(from=0, by=1e-1, to=1e4) 
+# initial conditions c(x0, y0, z0, v0, u0, w0):
+yini <- c(
+	  25,		44,		0, 
+	  0.2,		0,		0.1
+	  )
+# L1 (needs work)
+# yini <- c(
+# 	  1.15,		0.1,		0, 
+# 	  -1,		1.1,		0
+# 	  )
+# L3 (needs work)
+# yini <- c(
+# 	  -2.8,		0,		0, 
+# 	  0.1,		0.01,		0
+# 	  )
+# L4 (needs work)
+# yini <- c(
+# 	  x.L4,		y.L4+0.1,	0, 
+# 	  0.01,		0,		0.01
+# 	  )
+# L5 (needs work)
+# yini <- c(
+# 	  x.L5+0.01*runif(1),		y.L5+0.01*runif(1),		0+0.01*runif(1), 
+# 	  0+0.01*runif(1),		0+0.01*runif(1),		0+0.01*runif(1)
+# 	  )
 # strength of gravity:
-G <- 1
+G <- 10
 # mass of the "sun":
-M1 <- 4
+M1 <- 100 # 4
 # mass of the "planet":
 M2 <- 1
 # reduced mass for M1 and M2:
@@ -24,6 +51,8 @@ mu <- M1*M2/(M1+M2)
 R1 <- -0.5
 # distance from the CoM to M2:
 R2 <- -M1*R1/M2
+# distance between the big masses:
+R <- abs(R2-R1)
 # rotation rate of the reference frame:
 omega.z <- sqrt(G*(M1+M2)/abs(R2-R1)^3)
 # how many colors to use to plot the potential:
@@ -32,12 +61,10 @@ n.colors <- 2^6
 end.colors <- 0.8
 # how much of the red end of the colors to cut off:
 start.colors <- 0.05
-# value below which the potential is not drawn:
-pot.floor <- -7
 # color palette for the potential:
 pal <- rev(rainbow(n.colors, start= start.colors,end=end.colors)) 
-# time steps for the simulation:
-times <- seq(from=0, by=2e-3, to=3.87) 
+# how zoomed-in the plot is (smaller numbers -> smaller view):
+zoom.factor <- 2
 
 #### Definte the potential ####
 pot.grav <- function(x,y, x0, y0, M) -M*G/sqrt((x0-x)^2+(y0-y)^2)
@@ -50,8 +77,11 @@ potential.cap <- function(x,y)
 }
 
 #### Calculate potential field and make a color key ####
-x <- seq(from=-4, to=4, length.out=5e2)+0.75
-y <- seq(from=-3, to=3, length.out=5e2)
+x <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=5e2)
+y <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=5e2)
+# value below which the potential is not drawn:
+pot.floor <- potential(max(x), max(y))
+cat("\tCalculating potential field.\n")
 pot.XY <- outer(x, y, potential.cap)
 cols <- seq(from= min(pot.XY, na.rm=T), to= max(pot.XY, na.rm=T), length.out= n.colors)
 cols.mat <- matrix(cols, nrow=1)
@@ -64,7 +94,7 @@ y.L5 <- -y.L4
 # use polyroot() to easily find the locations of L1 and L2
 
 #### Calculate the motion of the satellite ####
-parms <- list(r1=c(R1, 0, 0), r2=c(R2, 0, 0), m1=M1, m2=M2, omega= c(0,0,omega.z)*sqrt(G*10/1))
+parms <- list(r1=c(R1, 0, 0), r2=c(R2, 0, 0), m1=M1, m2=M2, omega= c(0,0,omega.z))
 traj <- ode(y= yini, func=body3, times= times, parms=parms, method="rk4")
 traj <- data.frame(traj)
 
@@ -76,4 +106,4 @@ cat(
     )
 
 source("orbitPlot.R")
-system("cp orbit.pdf ~/Downloads/")
+# system("cp orbit.pdf ~/Downloads/")

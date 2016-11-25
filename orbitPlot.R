@@ -1,14 +1,15 @@
 # library("animation")
-require("scales")
+# require("scales")
 if (!exists("GIF"))
 {
 	GIF <- F
-       	cat("Defaulting to no GIF creation...\n")
+       	cat("\tDefaulting to no GIF creation...\n")
 }
 pdf("orbit.pdf")
 par.def <- par(no.readonly=T)
 
 #### Plot the potential field ###
+cat("\tPlotting the potential field.\n")
 nf <- layout(matrix(c(1,2), nrow=1), c(5, 1) )
 image(
       x, y, pot.XY, 
@@ -16,19 +17,23 @@ image(
       bty="n", axes= F, xlab=NA, ylab=NA
       )
 # contour(x, y, pot.XY, col="lightgray", drawlabels=F, add=T)
-points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 8, 8))
+points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 1, 10, 8, 8))
+points(R1, 0, pch=".")
 text(x=c(0,R1,R2,x.L4,x.L5), y=c(0,0,0,y.L4,y.L5), labels=c("CoM", "M1", "M2", "L4", "L5"), pos=3, offset=0.3, cex=0.8, font=2)
 
 #### plot the trajectory of the satellite ####
-plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l", col=alpha("black", 0.5), add=T)
-points(traj$X1, traj$X2, col=alpha("red", 0.01), pch=".")
+cat("\tPlotting the trajectory.\n")
+# plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l", col=alpha("black", 0.5), add=T)
+lines(traj$X1, traj$X2, asp=1, col="lightgray")
+# points(traj$X1, traj$X2, col=alpha("red", 0.01), pch=".")
+points(traj$X1, traj$X2, col="darkred", pch=".")
 # points(rep(parms$r1[1], 2), rep(parms$r1[2], 2), pch=c(1, 19))
-points(parms$r1[1],parms$r1[2], pch=1)
-points(parms$r1[1],parms$r1[2], pch=".")
-points(parms$r2[1],parms$r2[2], pch=10)
+# points(parms$r1[1],parms$r1[2], pch=1)
+# points(parms$r1[1],parms$r1[2], pch=".")
+# points(parms$r2[1],parms$r2[2], pch=10)
 
 #### plot the color key ####
-par.old <- par(mar=c(5,0,5,3))
+
 image(
       1, cols, cols.mat, 
       col=pal, bty="n", axes= F,
@@ -39,6 +44,7 @@ par(par.old)
 
 
 #### time domain of XYZ coords in rotating frame ####
+cat("\tPlotting the other heuristics.\n")
 layout(matrix(1:3, ncol=1))
 par.old <- par(mar=c(0,4,4,2))
 plot(traj$time, traj$X1, type="l", col="red", ylab="x")
@@ -73,13 +79,32 @@ plot(traj$X2, traj$X3, asp=1, type="l")
 par(par.old)
 
 par(par.def)
-scatterplot3d(traj$X1, traj$X2, traj$X3, scale.y=2, type="l")
+# scatterplot3d(traj$X1, traj$X2, traj$X3, scale.y=2, type="l")
+
+#### report initial values ####
+cat("\tReporting initial conditions.\n")
+plot.new()
+# report <- NULL
+# for (vari in ls())
+# {
+# 	val=get(vari)
+# 	if (typeof(val)!="closure")
+# 	{
+# 		if (length(val) > 6 )
+# 			val=head(val, 6)
+# 		# report <- paste(report, vari, "=", val, "\n")
+# 		cat(paste(report, vari, "=", val, "\n"))
+# 	}
+# }
+# cat(report)
+text(0.2,0.5,paste("yini=", capture.output(print(yini)), "\nM1=", M1, "\nM2=", M2, "\nG=", G, "\nR1=", R1), pos=4)
 
 dev.off()
 
 #### make a GIF of the motion ####
 if (GIF)
 {
+	cat("\tWriting a GIF.\n")
 	pdf("/tmp/orb%03d.pdf", onefile=F)
 	for (i in round(seq(from=1, to=length(traj$X1), length.out=200)))
 	{
@@ -98,4 +123,5 @@ if (GIF)
 	system("bash orbitGIF.sh")
 }
 
-# system("cp orbit.pdf ~/Downloads/")
+cat("\tCopying output to ~/Downloads.\n")
+system("cp orbit.pdf ~/Downloads/")
