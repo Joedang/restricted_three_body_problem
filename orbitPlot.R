@@ -1,5 +1,6 @@
 # library("animation")
 # require("scales")
+cat("\tBegining the plotting sequence.\n")
 if (!exists("GIF"))
 {
 	GIF <- F
@@ -8,40 +9,8 @@ if (!exists("GIF"))
 pdf("orbit.pdf")
 par.def <- par(no.readonly=T)
 
-#### Plot the potential field ###
-cat("\tPlotting the potential field.\n")
-nf <- layout(matrix(c(1,2), nrow=1), c(5, 1) )
-image(
-      x, y, pot.XY, 
-      asp=1, col= pal, 
-      bty="n", axes= F, xlab=NA, ylab=NA
-      )
-# contour(x, y, pot.XY, col="lightgray", drawlabels=F, add=T)
-points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 1, 10, 8, 8))
-points(R1, 0, pch=".")
-text(x=c(0,R1,R2,x.L4,x.L5), y=c(0,0,0,y.L4,y.L5), labels=c("CoM", "M1", "M2", "L4", "L5"), pos=3, offset=0.3, cex=0.8, font=2)
-
-#### plot the trajectory of the satellite ####
-cat("\tPlotting the trajectory.\n")
-# plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l", col=alpha("black", 0.5), add=T)
-lines(traj$X1, traj$X2, asp=1, col="lightgray")
-# points(traj$X1, traj$X2, col=alpha("red", 0.01), pch=".")
-points(traj$X1, traj$X2, col="darkred", pch=".")
-# points(rep(parms$r1[1], 2), rep(parms$r1[2], 2), pch=c(1, 19))
-# points(parms$r1[1],parms$r1[2], pch=1)
-# points(parms$r1[1],parms$r1[2], pch=".")
-# points(parms$r2[1],parms$r2[2], pch=10)
-
-#### plot the color key ####
-
-image(
-      1, cols, cols.mat, 
-      col=pal, bty="n", axes= F,
-      xlab= "U(r)", zlim= c(pot.floor, max(pot.XY, na.rm=T))
-      )
-axis(4, at=c(min(cols), mean(cols), max(cols)), labels= c("LO", "MID", "HI"))
-par(par.old)
-
+#### lay down a plot of the trajectory with labeled points and potential field ####
+rainbowPlot()
 
 #### time domain of XYZ coords in rotating frame ####
 cat("\tPlotting the other heuristics.\n")
@@ -104,20 +73,23 @@ dev.off()
 #### make a GIF of the motion ####
 if (GIF)
 {
-	cat("\tWriting a GIF.\n")
+	cat("\tWriting a GIF. This usually takes a while.\n")
 	pdf("/tmp/orb%03d.pdf", onefile=F)
 	for (i in round(seq(from=1, to=length(traj$X1), length.out=200)))
 	{
-		s3d <- scatterplot3d(
-				     traj$X1[1:i],
-				     traj$X2[1:i], 
-				     traj$X3[1:i],
-				     scale.y=2, type="l", angle=80, 
-				     xlim=range(traj$X1), 
-				     ylim=range(traj$X2), 
-				     zlim=range(traj$X3), 
-				     )
-		s3d$points3d(traj$X1[i], traj$X2[i], traj$X3[i])
+		# not ready yet; re-calculates potential field every time; makes PDFs take a long time to convert to JPG
+		# I really need to just recompile R to allow Yihui's GIF library.
+		# rainbowPlot() 
+		# s3d <- scatterplot3d(
+		# 		     traj$X1[1:i],
+		# 		     traj$X2[1:i], 
+		# 		     traj$X3[1:i],
+		# 		     scale.y=2, type="l", angle=80, 
+		# 		     xlim=range(traj$X1), 
+		# 		     ylim=range(traj$X2), 
+		# 		     zlim=range(traj$X3), 
+		# 		     )
+		# s3d$points3d(traj$X1[i], traj$X2[i], traj$X3[i])
 	}
 	dev.off()
 	system("bash orbitGIF.sh")

@@ -72,3 +72,65 @@ body3 <- function(t, y, parms, ...)
 		list(c(udot, vdot, wdot, uddot, vddot, wddot))
 	})
 }
+
+#### Definte the potential ####
+pot.grav <- function(x,y, x0, y0, M) -M*G/sqrt((x0-x)^2+(y0-y)^2)
+pot.CF <- function(x, y, omega.z) -1/2*omega.z^2*((x)^2+(y)^2)
+potential <- function(x,y) pot.CF(x, y, omega.z)+pot.grav(x, y, R1, 0, M1)+pot.grav(x, y, R2, 0, M2)
+potential.cap <- function(x,y, pot.floor)
+{
+	cat("Inside potential.cap()\n")
+	pot <- potential(x,y)
+	pot <- pot*(pot >= pot.floor ) +pot.floor*(pot < pot.floor)
+}
+
+rainbowPlot <- function()
+{
+	par.old <- par()
+	#### Calculate potential field and make a color key ####
+	x <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
+	y <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
+	# value below which the potential is not drawn:
+	pot.floor <- potential(max(x), max(y))
+	cat("\tCalculating potential field.\n")
+	pot.XY <- outer(x, y, function(x,y) potential.cap(x, y, pot.floor))
+	cols <- seq(from= min(pot.XY, na.rm=T), to= max(pot.XY, na.rm=T), length.out= n.colors)
+	cols.mat <- matrix(cols, nrow=1)
+
+	#### Plot the potential field ###
+	cat("\tPlotting the potential field.\n")
+	nf <- layout(matrix(c(1,2), nrow=1), c(5, 1) )
+	image(
+	      x, y, pot.XY, 
+	      asp=1, col= pal, 
+	      bty="n", axes= F, xlab=NA, ylab=NA
+	      )
+	# contour(x, y, pot.XY, col="lightgray", drawlabels=F, add=T)
+	points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 1, 10, 8, 8))
+	points(R1, 0, pch=".")
+	text(x=c(0,R1,R2,x.L4,x.L5), y=c(0,0,0,y.L4,y.L5), labels=c("CoM", "M1", "M2", "L4", "L5"), pos=3, offset=0.3, cex=0.8, font=2)
+
+	#### plot the trajectory of the satellite ####
+	cat("\tPlotting the trajectory.\n")
+	# plot(traj$X1, traj$X2, asp=1, main= "trjectory plot", xlim=c(-1.5, 1.5), ylim=c(-1.5, 1.5), type="l", col=alpha("black", 0.5), add=T)
+	lines(traj$X1, traj$X2, asp=1, col="lightgray")
+	# points(traj$X1, traj$X2, col=alpha("red", 0.01), pch=".")
+	points(traj$X1, traj$X2, col="darkred", pch=".")
+	# points(rep(parms$r1[1], 2), rep(parms$r1[2], 2), pch=c(1, 19))
+	# points(parms$r1[1],parms$r1[2], pch=1)
+	# points(parms$r1[1],parms$r1[2], pch=".")
+	# points(parms$r2[1],parms$r2[2], pch=10)
+
+	#### plot the color key ####
+	cat("\tPlotting the color key.\n")
+	par(mar=c(4,0,0,4))
+	image(
+	      1, cols, cols.mat, 
+	      col=pal, bty="n", axes= F,
+	      xlab= "U(r)", zlim= c(pot.floor, max(pot.XY, na.rm=T))
+	      )
+	axis(4, at=c(min(cols), mean(cols), max(cols)), labels= c("LO", "MID", "HI"))
+
+	layout(matrix(1))
+	suppressWarnings(par(par.old))
+}
