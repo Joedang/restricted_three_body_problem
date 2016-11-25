@@ -13,11 +13,14 @@ source("orbitFunctions.R")
 
 #### Input parameters ####
 # time steps for the simulation:
-times <- seq(from=0, by=1e-1, to=1e2) 
+# Use system.time(source("orbit.R")) when moving to large simulation times 
+# to estimate run time as a function of steps.
+times <- seq(from=0, by=1e-1, to=5e3) 
 # initial conditions c(x0, y0, z0, v0, u0, w0):
+# 1:3 resonant:
 yini <- c(
-	  25,		44,		0, 
-	  0.2,		0,		0.1
+	  24.75,		43.73,		0, 
+	  0.97,		0,		0
 	  )
 # L1 (needs work)
 # yini <- c(
@@ -29,10 +32,10 @@ yini <- c(
 # 	  -2.8,		0,		0, 
 # 	  0.1,		0.01,		0
 # 	  )
-# L4 (needs work)
+# L4 
 # yini <- c(
-# 	  x.L4,		y.L4+0.1,	0, 
-# 	  0.01,		0,		0.01
+# 	  25,		44,	0, 
+# 	  0.2,		0,		0.1
 # 	  )
 # L5 (needs work)
 # yini <- c(
@@ -85,6 +88,12 @@ cat(
     "Maximum step angle", max(ang), "degrees ocurring at step", which.max(ang), 
     "(", traj$time[which.max(ang)],"seconds).\n"
     )
+
+dateStr <- gsub(" ", "_", date())
+dateStr <- paste("interestingOrbits/archive/", dateStr, ".RData", sep="")
+cat("\tSaving simulation to", dateStr, "\n")
+save.image(file= dateStr)
+# Use load() to recover and plot these. 
 
 source("orbitPlot.R")
 # system("cp orbit.pdf ~/Downloads/")

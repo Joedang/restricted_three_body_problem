@@ -134,3 +134,15 @@ rainbowPlot <- function()
 	layout(matrix(1))
 	suppressWarnings(par(par.old))
 }
+
+trueTraj <- function(traj, omega.z)
+{
+	for (i in 1:length(traj$time))
+	{
+		t <- traj$time[i]
+		traj$x.true[i] <- traj$X1[i]*cos(omega.z*t) -traj$X2[i]*sin(omega.z*t)
+		traj$y.true[i] <- traj$X1[i]*sin(omega.z*t) +traj$X2[i]*cos(omega.z*t)
+		traj$t[i] <- t
+	}
+	return(traj)
+}

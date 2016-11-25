@@ -48,6 +48,9 @@ plot(traj$X2, traj$X3, asp=1, type="l")
 par(par.old)
 
 par(par.def)
+
+ttj <- trueTraj(traj, omega.z)
+plot(ttj$x.true, ttj$y.true, asp=1, type="l")
 # scatterplot3d(traj$X1, traj$X2, traj$X3, scale.y=2, type="l")
 
 #### report initial values ####
@@ -66,7 +69,14 @@ plot.new()
 # 	}
 # }
 # cat(report)
-text(0.2,0.5,paste("yini=", capture.output(print(yini)), "\nM1=", M1, "\nM2=", M2, "\nG=", G, "\nR1=", R1), pos=4)
+text(0.2,0.5,paste(
+		   "yini=", capture.output(print(yini)), 
+		   "\nM1=", M1, 
+		   "\nM2=", M2, 
+		   "\nG=", G, 
+		   "\nR1=", R1, 
+		   "\ndateStr=", dateStr
+		   ), pos=4)
 
 dev.off()
 
