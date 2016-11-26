@@ -74,13 +74,13 @@ body3 <- function(t, y, parms, ...)
 }
 
 #### Definte the potential ####
-pot.grav <- function(x,y, x0, y0, M) -M*G/sqrt((x0-x)^2+(y0-y)^2)
+pot.grav <- function(x,y,z, x0,y0,z0, M) -M*G/sqrt((x0-x)^2+(y0-y)^2+(z0-z)^2)
 pot.CF <- function(x, y, omega.z) -1/2*omega.z^2*((x)^2+(y)^2)
-potential <- function(x,y) pot.CF(x, y, omega.z)+pot.grav(x, y, R1, 0, M1)+pot.grav(x, y, R2, 0, M2)
+potential <- function(x,y,z) pot.CF(x, y, omega.z)+pot.grav(x,y,z, R1, 0, 0, M1)+pot.grav(x,y,z, R2, 0, 0, M2)
 potential.cap <- function(x,y, pot.floor)
 {
 	cat("Inside potential.cap()\n")
-	pot <- potential(x,y)
+	pot <- potential(x,y,0)
 	pot <- pot*(pot >= pot.floor ) +pot.floor*(pot < pot.floor)
 }
 
@@ -91,7 +91,7 @@ rainbowPlot <- function()
 	x <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
 	y <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
 	# value below which the potential is not drawn:
-	pot.floor <- potential(max(x), max(y))
+	pot.floor <- potential(max(x), max(y), 0)
 	cat("\tCalculating potential field.\n")
 	pot.XY <- outer(x, y, function(x,y) potential.cap(x, y, pot.floor))
 	cols <- seq(from= min(pot.XY, na.rm=T), to= max(pot.XY, na.rm=T), length.out= n.colors)
@@ -103,9 +103,17 @@ rainbowPlot <- function()
 	image(
 	      x, y, pot.XY, 
 	      asp=1, col= pal, 
-	      bty="n", axes= F, xlab=NA, ylab=NA
+	      bty="n", axes= F, xlab=NA, ylab=NA,
+	      main="Synodic Trajectory"
 	      )
-	# contour(x, y, pot.XY, col="lightgray", drawlabels=F, add=T)
+	E0 <- 1/2*sum(yini[4:6]^2) +potential(yini[1], yini[2], yini[3])
+	if (E0 > potential(x.L4, y.L4, 0))
+		cat("\tThere are no bounded regions.\n")
+	else
+	{
+		cat("\tThere are bounded regions.\n")
+		contour(x, y, pot.XY, col="black", drawlabels=F, add=T, levels=E0)
+	}
 	points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 1, 10, 8, 8))
 	points(R1, 0, pch=".")
 	text(x=c(0,R1,R2,x.L4,x.L5), y=c(0,0,0,y.L4,y.L5), labels=c("CoM", "M1", "M2", "L4", "L5"), pos=3, offset=0.3, cex=0.8, font=2)
@@ -136,13 +144,25 @@ rainbowPlot <- function()
 }
 
 trueTraj <- function(traj, omega.z)
+# {
+# 	for (i in 1:length(traj$time))
+# 	{
+# 		t <- traj$time[i]
+# 		traj$x.true[i] <- traj$X1[i]*cos(omega.z*t) -traj$X2[i]*sin(omega.z*t)
+# 		traj$y.true[i] <- traj$X1[i]*sin(omega.z*t) +traj$X2[i]*cos(omega.z*t)
+# 		traj$t[i] <- t
+# 	}
+# 	return(traj)
+# }
+trueTraj <- function(traj, omega.z)
 {
-	for (i in 1:length(traj$time))
-	{
-		t <- traj$time[i]
-		traj$x.true[i] <- traj$X1[i]*cos(omega.z*t) -traj$X2[i]*sin(omega.z*t)
-		traj$y.true[i] <- traj$X1[i]*sin(omega.z*t) +traj$X2[i]*cos(omega.z*t)
-		traj$t[i] <- t
-	}
-	return(traj)
+	x.true <- traj$X1*cos(omega.z*traj$time) -traj$X2*sin(omega.z*traj$time)
+	y.true <- traj$X1*sin(omega.z*traj$time) +traj$X2*cos(omega.z*traj$time)
+	return(data.frame(x.true, y.true, t=traj$time))
+}
+
+Eoft <- function(t, traj)
+{
+	i <- which.min(traj$time-t)
+	1/2*(traj$X4[i]^2+traj$X5[i]^2+traj$X6[i]^2) +potential(traj$X1[i], traj$X2[i], traj$X3[i])
 }
