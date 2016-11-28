@@ -104,7 +104,8 @@ rainbowPlot <- function()
 	      x, y, pot.XY, 
 	      asp=1, col= pal, 
 	      bty="n", axes= F, xlab=NA, ylab=NA,
-	      main="Synodic Trajectory"
+	      # main="Synodic Trajectory"
+	      main="Synodic Coordinates\n(rotational reference frame)"
 	      )
 	E0 <- 1/2*sum(yini[4:6]^2) +potential(yini[1], yini[2], yini[3])
 	if (E0 > potential(x.L4, y.L4, 0))
@@ -114,9 +115,19 @@ rainbowPlot <- function()
 		cat("\tThere are bounded regions.\n")
 		contour(x, y, pot.XY, col="black", drawlabels=F, add=T, levels=E0)
 	}
-	points(c(0,R1,R2,x.L4,x.L5), c(0,0,0,y.L4,y.L5), pch=c(8, 1, 10, 8, 8))
+	# contour(x, y, pot.XY, add=T, drawlabels=F, levels=c(-1, -1.5, -1.70, -2))
+	points(
+	       c(0,R1,R2,x.L4,x.L5,x.L1,x.L2,x.L3), 
+	       c(0,0,0,y.L4,y.L5,0,0,0), 
+	       pch=c(8, 1, 10, 8, 8, 8,8,8)
+	       )
 	points(R1, 0, pch=".")
-	text(x=c(0,R1,R2,x.L4,x.L5), y=c(0,0,0,y.L4,y.L5), labels=c("CoM", "M1", "M2", "L4", "L5"), pos=3, offset=0.3, cex=0.8, font=2)
+	text(
+	     x=c(0,R1,R2,x.L4,x.L5,x.L1,x.L2,x.L3), 
+	     y=c(0,0,0,y.L4,y.L5,0,0,0), 
+	     labels=c("CoM", "M1", "M2", "L4", "L5", "L1", "L2", "L3"), 
+	     pos=3, offset=0.3, cex=0.8, font=2
+	     )
 
 	#### plot the trajectory of the satellite ####
 	cat("\tPlotting the trajectory.\n")
@@ -143,7 +154,7 @@ rainbowPlot <- function()
 	suppressWarnings(par(par.old))
 }
 
-trueTraj <- function(traj, omega.z)
+# trueTraj <- function(traj, omega.z)
 # {
 # 	for (i in 1:length(traj$time))
 # 	{

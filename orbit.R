@@ -15,13 +15,13 @@ source("orbitFunctions.R")
 # time steps for the simulation:
 # Use system.time(source("orbit.R")) when moving to large simulation times 
 # to estimate run time as a function of steps.
-times <- seq(from=0, by=1e-3, to=1e2) 
+times <- seq(from=0, by=1e-3, to=1e-3) 
 # initial conditions c(x0, y0, z0, v0, u0, w0):
 yini <- c(
 	  0.78,		0.01,		0, 
 	  0.15,		-0.13,		0
 	  )
-mu.2 <- 0.03
+mu.2 <- 0.3
 # Normalized parameters:
 M2 <- mu.2
 M1 <- 1-mu.2
@@ -53,13 +53,22 @@ start.colors <- 0.05
 # color palette for the potential:
 pal <- rev(rainbow(n.colors, start= start.colors,end=end.colors)) 
 # how zoomed-in the plot is (smaller numbers -> smaller view):
-zoom.factor <- 2
+zoom.factor <- 1.5
 
 #### Calculate the locations of the Lagrange points ####
 x.L4 <- (R2-R1)*cos(pi/3)+R1
 y.L4 <- (R2-R1)*sin(pi/3)
 x.L5 <- x.L4
 y.L5 <- -y.L4
+xL1 <- seq(from=R1, to= R2, length.out=1e3)
+pot1 <- potential(xL1, 0,0)
+x.L1 <- xL1[which.max(pot1)]
+xL2 <- seq(from=R2, to= R2+R, length.out=1e3)
+pot2 <- potential(xL2, 0,0)
+x.L2 <- xL2[which.max(pot2)]
+xL3 <- seq(from=R1-R, to= R1, length.out=1e3)
+pot3 <- potential(xL3, 0,0)
+x.L3 <- xL3[which.max(pot3)]
 # use polyroot() to easily find the locations of L1 and L2
 
 #### Calculate the motion of the satellite ####
