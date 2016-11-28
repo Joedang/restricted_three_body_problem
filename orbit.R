@@ -86,6 +86,7 @@ cat(
 
 dateStr <- gsub(" ", "_", date())
 dateStr <- paste("interestingOrbits/archive/", dateStr, ".RData", sep="")
+dateStr <- gsub(":", "-", dateStr)
 cat("\tSaving simulation to", dateStr, "\n")
 save.image(file= dateStr)
 # Use load() to recover and plot these. 
