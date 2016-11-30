@@ -3,6 +3,8 @@
 # See https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Soetaert~et~al.pdf
 # for a quick overview of how to use the package, and the official docs for more
 # details.
+# Use something similar to the following to render videos.
+# animateOrbit(data.in="interestingOrbits/archive/Tue_Nov_29_23-21-27_2016.RData", mp4.out="confinedTransfers4.gif", runtime=60, FPS=30)
 # Joe Shields
 # 2016-10-6
 
@@ -15,11 +17,11 @@ source("orbitFunctions.R")
 # time steps for the simulation:
 # Use system.time(source("orbit.R")) when moving to large simulation times 
 # to estimate run time as a function of steps.
-times <- seq(from=0, by=1e-3, to=1e-3) 
+times <- seq(from=0, by=0.0001, to=60) 
 # initial conditions c(x0, y0, z0, v0, u0, w0):
 yini <- c(
-	  0.78,		0.01,		0, 
-	  0.15,		-0.13,		0
+	  0.2865,	0.0,		0, 
+	  0.41,		-0.39,		0
 	  )
 mu.2 <- 0.3
 # Normalized parameters:
@@ -73,6 +75,7 @@ x.L3 <- xL3[which.max(pot3)]
 
 #### Calculate the motion of the satellite ####
 cat("\tCalculating the motion of the satellite. This may take a while. (", length(times),"steps)\n")
+cat("\tEstimated crunch time (based on large runs on my laptop):", length(times)*712e-6, "seconds\n")
 parms <- list(r1=c(R1, 0, 0), r2=c(R2, 0, 0), m1=M1, m2=M2, omega= c(0,0,omega.z))
 traj <- ode(y= yini, func=body3, times= times, parms=parms, method="rk4")
 traj <- data.frame(traj)

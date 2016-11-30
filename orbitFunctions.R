@@ -105,7 +105,7 @@ rainbowPlot <- function()
 	      asp=1, col= pal, 
 	      bty="n", axes= F, xlab=NA, ylab=NA,
 	      # main="Synodic Trajectory"
-	      main="Synodic Coordinates\n(rotational reference frame)"
+	      mai="Synodic Coordinates\n(rotational reference frame)"
 	      )
 	E0 <- 1/2*sum(yini[4:6]^2) +potential(yini[1], yini[2], yini[3])
 	if (E0 > potential(x.L4, y.L4, 0))
@@ -177,3 +177,82 @@ Eoft <- function(t, traj)
 	i <- which.min(traj$time-t)
 	1/2*(traj$X4[i]^2+traj$X5[i]^2+traj$X6[i]^2) +potential(traj$X1[i], traj$X2[i], traj$X3[i])
 }
+
+library("animation")
+animateOrbit <- function(data.in, mp4.out, runtime=10, FPS=20, startTime=0, stopTime= NA)
+{
+	attach(data.in, name="dat")
+	nmax <- runtime*FPS
+	interval <- 1/FPS
+	if (is.na(stopTime))
+		stopTime <- max(traj$time)
+	i.start <- which.min(abs(startTime-traj$time))
+	i.end <- which.min(abs(stopTime-traj$time))
+	ind <- round(seq(from=i.start, to=i.end, length.out=nmax))
+	cat("range of ind:\n",range(ind), "\n")
+	#### Calculate potential field and make a color key ####
+	x <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
+	y <- seq(from=-zoom.factor*R, to=zoom.factor*R, length.out=3e2)
+	# value below which the potential is not drawn:
+	pot.floor <- potential(max(x), max(y), 0)
+	cat("\tCalculating potential field.\n")
+	pot.XY <- outer(x, y, function(x,y) potential.cap(x, y, pot.floor))
+	cols <- seq(from= min(pot.XY, na.rm=T), to= max(pot.XY, na.rm=T), length.out= n.colors)
+	cols.mat <- matrix(cols, nrow=1)
+	E0 <- 1/2*sum(yini[4:6]^2) +potential(yini[1], yini[2], yini[3])
+	if (E0 > potential(x.L4, y.L4, 0))
+		cat("\tThere are no bounded regions.\n")
+	else
+		cat("\tThere are bounded regions.\n")
+#	x.L4 <- (R2-R1)*cos(pi/3)+R1
+#	y.L4 <- (R2-R1)*sin(pi/3)
+#	x.L5 <- x.L4
+#	y.L5 <- -y.L4
+#	xL1 <- seq(from=R1, to= R2, length.out=1e3)
+#	pot1 <- potential(xL1, 0,0)
+#	x.L1 <- xL1[which.max(pot1)]
+#	xL2 <- seq(from=R2, to= R2+R, length.out=1e3)
+#	pot2 <- potential(xL2, 0,0)
+#	x.L2 <- xL2[which.max(pot2)]
+#	xL3 <- seq(from=R1-R, to= R1, length.out=1e3)
+#	pot3 <- potential(xL3, 0,0)
+#	x.L3 <- xL3[which.max(pot3)]
+
+	#### Plot the potential field ###
+ 	saveVideo({
+#	saveGIF({
+		par.old <- par(mar=c(0,0,0,0))
+		ani.options(interval = interval, nmax = nmax)
+		for (i in ind)
+		{
+			image(
+			      x, y, pot.XY, 
+			      asp=1, col= pal, 
+			      bty="n", axes= F, xlab=NA, ylab=NA,
+			      # main="Synodic Trajectory"
+			      mai="Synodic Coordinates\n(rotational reference frame)"
+			      )
+			contour(x, y, pot.XY, col="black", drawlabels=F, add=T, levels=E0)
+			points(
+			       c(0,R1,R2,x.L4,x.L5,x.L1,x.L2,x.L3), 
+			       c(0,0,0,y.L4,y.L5,0,0,0), 
+			       pch=c(8, 1, 10, 8, 8, 8,8,8)
+			       )
+			points(R1, 0, pch=".")
+			text(
+			     x=c(0,R1,R2,x.L4,x.L5,x.L1,x.L2,x.L3), 
+			     y=c(0,0,0,y.L4,y.L5,0,0,0), 
+			     labels=c("CoM", "M1", "M2", "L4", "L5", "L1", "L2", "L3"), 
+			     pos=3, offset=0.3, cex=0.8, font=2
+			     )
+			tail <- seq(from=abs(i-1e3), to=i)
+			lines(traj$X1[tail], traj$X2[tail], asp=1, col="black", lwd=2)
+			lines(traj$X1[tail], traj$X2[tail], asp=1, col="white", lwd=0.7)
+			points(traj$X1[i], traj$X2[i], col="darkred", bg="white", pch=21, cex=3)
+		}
+		par(par.old)
+	}, video.name=mp4.out, other.opts = "-pix_fmt yuv420p -b 300k")
+#	}, movie.name= mp4.out)
+	detach(dat, unload=T)
+}
+
