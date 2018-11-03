@@ -1,7 +1,7 @@
 # restricted_three_body_problem
 Some tools for exploring the restricted 3 body problem with R.
 
-![](interestingOrbits/confinedTransfers.mp4)  
+[If you're looking for pretty pictures, click here!](interestingOrbits/confinedTransfers.mp4)  
 _Shown: a satellite that's bound by the energy-like potential in the synodic reference frame._
 
 I originally did this as part of a report on the 3 body problem for a PhD-level course in classical mechanics. In truth, it was largely unnecessary for the repot and just an excuse to write/play with a simulation.
